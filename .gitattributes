@@ -1,0 +1,13 @@
+# Convert all line-ending to crlf (Windows style)
+* text eol=crlf
+
+# Do not attempt conversion on the following binary file types
+*.dll binary
+*.eot binary
+*.exe binary
+*.png binary
+*.swf binary
+*.ttf binary
+*.vsdx binary
+*.node binary
+*.gif binary

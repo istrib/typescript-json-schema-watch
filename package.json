@@ -1,0 +1,33 @@
+{
+  "name": "typescript-json-schema-watch",
+  "version": "0.1.0",
+  "description": "Generates JSON Schema from TypeScript interfaces",
+  "files": [
+    "lib",
+    "bin"
+  ],
+  "bin": {
+    "typescript-json-schema-watch": "typescript-json-schema-watch.js"
+  },
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "author": "Istrib",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "chokidar": "^1.6.1",
+    "debounce": "^1.0.0",
+    "fs-promise": "^2.0.0",
+    "glob": "^7.1.1",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "typescript-json-schema": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/chokidar": "^1.4.31",
+    "@types/debounce": "0.0.30",
+    "@types/glob": "^5.0.30",
+    "@types/minimist": "^1.2.0",
+    "@types/mkdirp": "^0.3.29",
+    "typescript": "~2.1.5"
+  }
+}
