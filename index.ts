@@ -1,6 +1,6 @@
 import * as TJS from "typescript-json-schema";
 import * as globLib from "glob";
-import * as minimist from "minimist";
+import * as args from "commander";
 import * as ts from "typescript";
 import * as fs from "fs-promise";
 import * as path from "path";
@@ -9,13 +9,34 @@ import * as chokidar from "chokidar";
 
 let watcher: chokidar.FSWatcher = null;
 
-var args = minimist(process.argv.slice(2), {
-    string: [ "tsconfig", "srcRoot", "targetRoot", "srcFilePattern"],
-    boolean: [ "defaultProps", "required", "strictNullChecks", "watch", "verbose"],
-    default: { defaultProps: false, required: false, strictNullChecks: false, watch: false, verbose: false },
-});
+args.version("0.1.5")
+    .usage("[options]")
+    .option("--tsconfig <path>", "Path to tsconfig.json.")
+    .option("--srcRoot <path>", "Path to root directory with TypeScript files.") 
+    .option("--srcFilePattern <glob>", "E.g. **/*.schema.ts - specifies which TypeScript files to process. This is relative to --srcRoot.") 
+    .option("--targetRoot <path>", "Path to target directory where *.json schema files will be generated.") 
+    .option("--defaultProps", "Create default properties definitions.", false) 
+    .option("--required", "Create required array for non-optional properties.", false) 
+    .option("--strictNullChecks", "Make values non-nullable by default.", false) 
+    .option("--watch", "Re-generate Json schema file on change to TypeScript file.", false) 
+    .option("--verbose", "Show info for each generated file.", false) 
+    .parse(process.argv);
 
+validateArgumentsGiven(["tsconfig", "srcRoot", "srcFilePattern", "targetRoot"]);
 run();
+
+function validateArgumentsGiven(argumentNames: string[]) {
+    argumentNames.forEach(argumentName => {
+        if (!args[argumentName]) {
+            console.error(`--${argumentName} is required.`);
+        }
+    });
+
+    if (argumentNames.some(argumentName => !args[argumentName])) {
+        console.info("Use --help to display usage.");
+        process.exit(2);
+    }
+}
 
 async function run() {
     const srcFilesGlob = path.join(args["srcRoot"], args["srcFilePattern"]);
