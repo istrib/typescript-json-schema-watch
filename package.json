@@ -1,6 +1,6 @@
 {
   "name": "typescript-json-schema-watch",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "description": "Generates JSON Schema from TypeScript interfaces",
   "files": [
     "lib",
