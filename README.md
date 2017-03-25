@@ -1,5 +1,5 @@
 This is a simple wrapper around the excellent https://github.com/YousefED/typescript-json-schema
-The primary purpose of this tool is to use TypeScript interfaces as a mean to specify schema for RESTful API. 
+The primary purpose of this tool is to use TypeScript interfaces as schema specification for RESTful API messages. 
 
 Example of this CLI:
 

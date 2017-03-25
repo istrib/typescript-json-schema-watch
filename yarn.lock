@@ -1118,7 +1118,7 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
 
-typescript-json-schema@^0.10.0:
+typescript-json-schema@~0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/typescript-json-schema/-/typescript-json-schema-0.10.0.tgz#e05a02c466e9f5998d09e9565dab76f1bf5d6bae"
   dependencies:
