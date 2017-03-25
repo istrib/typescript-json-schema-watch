@@ -1,5 +1,5 @@
 # Convert all line-ending to crlf (Windows style)
-* text eol=crlf
+* text eol=lf
 
 # Do not attempt conversion on the following binary file types
 *.dll binary
