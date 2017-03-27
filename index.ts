@@ -15,6 +15,8 @@ args.version("0.1.9")
     .option("--srcRoot <path>", "Path to root directory with TypeScript files.") 
     .option("--srcFilePattern <glob>", "E.g. **/*.schema.ts - specifies which TypeScript files to process. This is relative to --srcRoot.") 
     .option("--targetRoot <path>", "Path to target directory where *.json schema files will be generated.") 
+    .option("--typeNamePrefix [prefix]", "Specifies type name prefix which is not included in file names.")
+    .option("--typeNameSuffix [suffix]", "Specifies type name suffix which is not included in file names.")
     .option("--defaultProps", "Create default properties definitions.", false) 
     .option("--required", "Create required array for non-optional properties.", false) 
     .option("--strictNullChecks", "Make values non-nullable by default.", false) 
@@ -113,12 +115,20 @@ async function generateManyFiles(sourceFilePaths: string[]): Promise<boolean> {
 async function generateOneFile(sourceFilePath: string, generator: TJS.JsonSchemaGenerator) {
     const sourceFileName = path.basename(sourceFilePath);
     const coreName = sourceFileName.split(".", 1)[0];
-    const interfaceName = coreName.charAt(0).toUpperCase() + coreName.slice(1);
+    
+    let typeName = coreName.charAt(0).toUpperCase() + coreName.slice(1);
+    if (args["typeNamePrefix"]) {
+        typeName = args["typeNamePrefix"] + typeName;
+    }
+    if (args["typeNameSuffix"]) {
+        typeName += args["typeNameSuffix"];
+    }
+
     const outputFileName = sourceFileName.slice(0, sourceFileName.lastIndexOf(".")) + ".json";
     const outputDirName = path.join(args["targetRoot"], path.relative(args["srcRoot"], path.dirname(sourceFilePath)));
     const outputFilePath = path.join(outputDirName, outputFileName);
 
-    const schemaDefinition = generator.getSchemaForSymbol(interfaceName);
+    const schemaDefinition = generator.getSchemaForSymbol(typeName);
 
     mkdirp.sync(outputDirName);
     await fs.writeJson(outputFilePath, schemaDefinition);
