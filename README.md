@@ -6,18 +6,19 @@ The primary purpose of this tool is to use TypeScript interfaces as schema speci
 
   Options:
 
-    -h, --help               output usage information
-    -V, --version            output the version number
-    --tsconfig <path>        Path to tsconfig.json.
-    --srcRoot <path>         Path to root directory with TypeScript files.
-    --srcFilePattern <glob>  E.g. **/*.schema.ts - specifies which TypeScript files to process. 
-                             This is relative to --srcRoot.
-    --targetRoot <path>      Path to target directory where *.json schema files will be generated.
-    --defaultProps           Create default properties definitions.
-    --required               Create required array for non-optional properties.
-    --strictNullChecks       Make values non-nullable by default.
-    --watch                  Re-generate Json schema file on change to TypeScript file.
-    --verbose                Show info for each generated file.
+    -h, --help                 output usage information
+    -V, --version              output the version number
+    --tsconfig <path>          Path to tsconfig.json.
+    --srcRoot <path>           Path to root directory with TypeScript files.
+    --srcFilePattern <glob>    E.g. **/*.schema.ts - specifies which TypeScript files to process. This is relative to --srcRoot.
+    --targetRoot <path>        Path to target directory where *.json schema files will be generated.
+    --typeNamePrefix [prefix]  Specifies type name prefix which is not included in file names.
+    --typeNameSuffix [suffix]  Specifies type name suffix which is not included in file names.
+    --defaultProps             Create default properties definitions.
+    --required                 Create required array for non-optional properties.
+    --strictNullChecks         Make values non-nullable by default.
+    --watch                    Re-generate Json schema file on change to TypeScript file.
+    --verbose                  Show info for each generated file.
 ```
 
 Example:
