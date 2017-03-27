@@ -9,7 +9,7 @@ import * as chokidar from "chokidar";
 
 let watcher: chokidar.FSWatcher = null;
 
-args.version("0.1.9")
+args.version("0.1.10")
     .usage("[options]")
     .option("--tsconfig <path>", "Path to tsconfig.json.")
     .option("--srcRoot <path>", "Path to root directory with TypeScript files.") 
