@@ -9,14 +9,14 @@ import * as chokidar from "chokidar";
 
 let watcher: chokidar.FSWatcher = null;
 
-args.version("0.1.10")
+args.version("0.2.0")
     .usage("[options]")
     .option("--tsconfig <path>", "Path to tsconfig.json.")
     .option("--srcRoot <path>", "Path to root directory with TypeScript files.") 
     .option("--srcFilePattern <glob>", "E.g. **/*.schema.ts - specifies which TypeScript files to process. This is relative to --srcRoot.") 
     .option("--targetRoot <path>", "Path to target directory where *.json schema files will be generated.") 
-    .option("--typeNamePrefix [prefix]", "Specifies type name prefix which is not included in file names.")
-    .option("--typeNameSuffix [suffix]", "Specifies type name suffix which is not included in file names.")
+    .option("--typeNamePrefix [prefix]", "Specifies type name prefix which is not included in file names. Only used when file doesn't contain jsdoc comments specifying generation options.")
+    .option("--typeNameSuffix [suffix]", "Specifies type name suffix which is not included in file names. Only used when file doesn't contain jsdoc comments specifying generation options.")
     .option("--defaultProps", "Create default properties definitions.", false) 
     .option("--required", "Create required array for non-optional properties.", false) 
     .option("--strictNullChecks", "Make values non-nullable by default.", false) 
@@ -95,13 +95,13 @@ async function generateManyFiles(sourceFilePaths: string[]): Promise<boolean> {
     let numberOfSuccessful = 0;
     for (let i = 0; i < sourceFilePaths.length; i++) {
         try {
-            await generateOneFile(sourceFilePaths[i], generator);
+            await generateForOneFile(sourceFilePaths[i], program, generator);
             numberOfSuccessful++;
             if (args["verbose"]) {
-                console.log(`Generated Json schema for ${sourceFilePaths[i]}.`);
+                console.log(`Generated Json schema(s) for ${sourceFilePaths[i]}.`);
             }
         } catch (error) {
-            console.error(`Failed to generate Json schema for ${sourceFilePaths[i]}: ${error}.`);
+            console.error(`Failed to generate Json schema(s) for ${sourceFilePaths[i]}: ${error}.`);
         }
     };
 
@@ -112,7 +112,21 @@ async function generateManyFiles(sourceFilePaths: string[]): Promise<boolean> {
     return numberOfSuccessful == sourceFilePaths.length;
 }
 
-async function generateOneFile(sourceFilePath: string, generator: TJS.JsonSchemaGenerator) {
+async function generateForOneFile(sourceFilePath: string, program: ts.Program, generator: TJS.JsonSchemaGenerator) {
+    const outputDirName = path.join(args["targetRoot"], path.relative(args["srcRoot"], path.dirname(sourceFilePath)));
+    mkdirp.sync(outputDirName);
+    
+    const typesDeclaredViaComments = getTypesToGenerateDeclaredViaJsDocComments(sourceFilePath, program);
+    if (typesDeclaredViaComments.length > 0) {
+        await Promise.all(typesDeclaredViaComments.map((typeDeclaredViaComments) => {
+            const outputFilePath = path.join(outputDirName, typeDeclaredViaComments.schemaFileName);
+            const schemaDefinition = generator.getSchemaForSymbol(typeDeclaredViaComments.typeName);
+            return fs.writeJson(outputFilePath, schemaDefinition);
+        }));
+
+        return;
+    }
+
     const sourceFileName = path.basename(sourceFilePath);
     const coreName = sourceFileName.split(".", 1)[0];
     
@@ -125,13 +139,36 @@ async function generateOneFile(sourceFilePath: string, generator: TJS.JsonSchema
     }
 
     const outputFileName = sourceFileName.slice(0, sourceFileName.lastIndexOf(".")) + ".json";
-    const outputDirName = path.join(args["targetRoot"], path.relative(args["srcRoot"], path.dirname(sourceFilePath)));
     const outputFilePath = path.join(outputDirName, outputFileName);
 
     const schemaDefinition = generator.getSchemaForSymbol(typeName);
 
-    mkdirp.sync(outputDirName);
     await fs.writeJson(outputFilePath, schemaDefinition);
+}
+
+function getTypesToGenerateDeclaredViaJsDocComments(sourceFilePath: string, program: ts.Program): { typeName: string, schemaFileName: string }[] {
+    const typesToGenerate: { typeName: string, schemaFileName: string }[] = [];
+
+    const checker = program.getTypeChecker();
+    const sourceFile = program.getSourceFile(sourceFilePath);
+    
+    ts.forEachChild(sourceFile, (node) => {
+        if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
+            const declaration: ts.InterfaceDeclaration = <ts.InterfaceDeclaration>node;
+            const symbol = checker.getSymbolAtLocation(declaration.name);
+            const jsDocTags = symbol.getJsDocTags();
+
+            const generateJsonSchemaTag = jsDocTags.find((tag) => tag.name.toLowerCase() === "generatejsonschema");
+            if (generateJsonSchemaTag) {
+                typesToGenerate.push({
+                    typeName: symbol.name,
+                    schemaFileName: generateJsonSchemaTag.text,
+                });
+            }
+        }
+    });
+
+    return typesToGenerate;
 }
 
 function programFromConfig(fileNames: string[], configFileName: string): ts.Program {
